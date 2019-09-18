@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body onload="move()">
+<canvas id="myCanvas" width="500px" height="600px"
+        style=" border:10px solid deepskyblue; left: 400px;position: absolute"></canvas>
+<h2 style="position: absolute ; left: 300px; top:5px">Score:</h2>
+<button type="button" onclick="play()" style="width: 80px;height: 50px ;position: absolute;top: 100px;left: 300px ">Play
+</button>
+<button type="button" onclick="reset()" style="width: 80px;height: 50px ;position: absolute;top: 160px;left: 300px ">
+    Reset
+</button>
+<h2 id="rs" style="position: absolute ; left: 370px;top:5px"></h2>
+<script>
+
+    let canvas = document.getElementById("myCanvas");
+    let can = canvas.getContext('2d');
+    let grd = can.createLinearGradient(0, 0, 1000, 0);
+    grd.addColorStop(0, "red");
+    grd.addColorStop(1, "blue");
+
+    let Bong = function (x1, y1, bankinh, xSpeed, ySpeed) {
+        this.x1 = x1;
+        this.y1 = y1;
+        this.bankinh = bankinh;
+        this.vx = xSpeed;
+        this.vy = ySpeed;
+        this.circle = function () {
+            can.beginPath();
+            can.fillStyle = grd;
+            can.arc(this.x1, this.y1, this.bankinh, 0, Math.PI * 2);
+            can.stroke();
+            can.fill();
+        };
+        this.dichuyen = function (thanhdo) {
+            this.x1 += this.vx;
+            this.y1 += this.vy;
+            if (this.x1 > canvas.width - this.bankinh || this.x1 < 0) this.vx = -this.vx;
+            if (this.y1 < 0) this.vy = -this.vy;
+            if (this.x1 < thanhdo.x + (thanhdo.dai) && this.y1 < thanhdo.y + thanhdo.rong &&
+                this.x1 > thanhdo.x - (thanhdo.dai) && this.y1 > thanhdo.y - thanhdo.rong) {
+                this.vy = -ySpeed
+            }
+        };
+        this.toadobandau = function () {
+            this.x1 = x1;
+            this.y1 = y1;
+        }
+
+    };
+    let Bar = function (color, x, y, dai, rong, VX) {
+        this.VX = VX;
+        this.x = x;
+        this.y = y;
+        this.dai = dai;
+        this.rong = rong;
+        this.trangthai = "Turn right";
+        this.hinh = function () {
+            can.fillStyle = color;
+            can.fillRect(this.x, this.y, this.dai, this.rong);
+            can.stroke();
+        };
+        this.turnLeft = function () {
+            if (this.x <= canvas.width - this.dai)
+                this.x += this.VX
+        };
+        this.turnRight = function () {
+            if (this.x >= 0)
+                this.x += -this.VX
+        };
+        this.moveBar = function () {
+            switch (this.trangthai) {
+                case "left":
+                    this.turnLeft();
+                    break;
+                case "right":
+                    this.turnRight();
+                    break
+            }
+        };
+        this.ballBar=function (ball,bar){
+            mang.forEach(function (b) {
+                if (!b.trangthaigach) {
+                    if (ball.x1 >= b.cx && ball.x1 <= b.cx + bar.dai &&
+                        ball.y1 + ball.bankinh >= b.cy && ball.y1 - ball.bankinh <= b.cy + bar.rong) {
+                        ball.vy = -ball.vy;
+                        ball.vx = -ball.vy;
+                        b.trangthaigach = true;
+                        diem += 1;
+                    }
+                }
+            })
+
+        };
+    };
+    let bong = new Bong(250, 180, 12, 1, 1);
+    let thanhdo = new Bar("blue", 30, 580, 130, 10, 1);
+    let mang = [];
+    let diem = 0;
+    bong.circle();
+    thanhdo.hinh();
+
+    function dichuyenThanhdo(e) {
+        switch (e.keyCode) {
+            case 37:
+                thanhdo.trangthai = "right";
+                break;
+            case 39:
+                thanhdo.trangthai = "left";
+                break;
+        }
+        console.log(thanhdo.trangthai)
+    }
+
+    function move() {
+        window.addEventListener("keydown", dichuyenThanhdo)
+    }
+
+    let start;
+
+    function GameStart() {
+        start = setInterval(function () {
+            can.clearRect(0, 0, canvas.width, canvas.height);
+            bong.circle();
+            bong.dichuyen(thanhdo);
+            thanhdo.hinh();
+            thanhdo.moveBar();
+            thanhdo.ballBar();
+            move();
+            GameOver();
+            score();
+        }, 1);
+    }
+    function score() {
+        document.getElementById("rs").innerHTML = diem;
+    }
+    function GameOver() {
+        if (bong.y1 > canvas.height-bong.bankinh) {
+            clearInterval(start);
+            alert("Click Reset to play again !")
+        }
+    }
+
+    function reset() {
+        window.location.reload();
+    }
+
+    function play() {
+        GameStart();
+    }
+</script>
+</body>
+</html>
